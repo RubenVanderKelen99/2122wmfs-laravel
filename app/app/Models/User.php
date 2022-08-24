@@ -34,6 +34,13 @@ class User extends Authenticatable
     ];
 
     /**
+     * The attributes that should be visible for serialization.
+     *
+     * @var array<int, string>
+     */
+    protected $visible = ['id', 'name', 'email', 'role'];
+
+    /**
      * The attributes that should be cast.
      *
      * @var array<string, string>
@@ -41,4 +48,16 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    protected $attributes = [
+        'role' => 'user',
+    ];
+
+    public function rides() {
+        return $this->hasMany(Ride::class, 'id');
+    }
+
+    public function comments() {
+        return $this->hasMany(Comment::class, 'id');
+    }
 }

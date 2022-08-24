@@ -17,10 +17,10 @@ class UserSeeder extends Seeder
     public function run()
     {
         DB::table('users')->insert([
-            'id' => 1,
             'name' => 'Ruben Van der Kelen',
             'email' => 'ruben.vanderkelen@student.odisee.be',
             'password' => Hash::make('Azerty123'),
+            'role' => 'admin',
             'email_verified_at' => null,
             'remember_token' => null,
             'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
@@ -29,10 +29,10 @@ class UserSeeder extends Seeder
 
         for ($i = 2; $i <= 10; $i++) {
             DB::table('users')->insert([
-                'id' => $i,
                 'name' => 'user ' . $i,
                 'email' => 'user' . $i . '@email.com',
                 'password' => Hash::make('Azerty123'),
+                'role' => 'user',
                 'email_verified_at' => null,
                 'remember_token' => null,
                 'created_at' => Carbon::now()->format('Y-m-d H:i:s'),

@@ -15,8 +15,10 @@ class CreateRidesTable extends Migration
     {
         Schema::create('rides', function (Blueprint $table) {
             $table->id();
-            $table->point('start');
-            $table->point('destination');
+            $table->double('lat_start');
+            $table->double('lng_start');
+            $table->double('lat_destination');
+            $table->double('lng_destination');
             $table->dateTime('start_time', $precision = 0);
             $table->dateTime('end_time', $precision = 0);
             $table->enum('type', ['offer', 'request', 'match', 'finished']);
