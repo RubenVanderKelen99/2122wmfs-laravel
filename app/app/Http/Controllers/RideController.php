@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Comment;
 use App\Models\Ride;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class RideController extends Controller
 {
@@ -88,12 +90,14 @@ class RideController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
-     * @return string[]
+     * @return \array[][]|string[]
      */
     public function update(Request $request, $id)
     {
         $ride = Ride::findOrFail($id);
         $this->validateRequest($request);
+
+        //return ['data' => $this->checkForMatchUpdate($ride->id, $request, 10)];
 
         $ride->fill($request->all());
         $ride->save();
@@ -133,6 +137,81 @@ class RideController extends Controller
             'type' => 'required|in:request,offer,match',
             'user1_id' => 'required|exists:App\Models\User,id',
         ]);
+    }
+
+    protected function checkForMatch($data, $distance)
+    {
+        var_dump(date($data->start_time));
+        $activeRides = Ride::query()->where(function($query) {
+                $query->where('type', 'offer')
+                    ->orWhere('type', 'request');
+            });
+
+        $ridesMatchAtStart= $activeRides->having('distance', '<=', $distance)
+            ->select(DB::raw("*,
+                     (3959 * ACOS(COS(RADIANS($data->lat_start))
+                           * COS(RADIANS(lat_start))
+                           * COS(RADIANS($data->lng_start) - RADIANS(lng_start))
+                           + SIN(RADIANS($data->lat_start))
+                           * SIN(RADIANS(lat_start)))) AS distance")
+            )->orderBy('distance', 'asc')->get();
+
+        $ridesMatchAtEnd= $activeRides->having('distance', '<=', $distance)
+            ->select(DB::raw("*,
+                     (3959 * ACOS(COS(RADIANS($data->lat_destination))
+                           * COS(RADIANS(lat_destination))
+                           * COS(RADIANS($data->lng_destination) - RADIANS(lng_destination))
+                           + SIN(RADIANS($data->lat_destination))
+                           * SIN(RADIANS(lat_destination)))) AS distance")
+            )->orderBy('distance', 'asc')
+            ->get();
+
+        foreach ($ridesMatchAtStart as $key => $rideMatchAtStart) {
+            foreach ($ridesMatchAtEnd as $key2 => $rideMatchAtEnd) {
+                if($rideMatchAtStart->id = $rideMatchAtEnd->id) {
+                    return ['data' => ['isMatch' => true, 'matchId' => $rideMatchAtEnd->id]];
+                }
+            }
+        }
+        return ['data' => ['isMatch' => false, 'matchId' => '']];
+    }
+
+    protected function checkForMatchUpdate($id, $data, $distance)
+    {
+        var_dump(date($data->start_time));
+        $activeRides = Ride::query()->where('id', '!=', $id)
+            ->where(function($query) {
+            $query->where('type', 'offer')
+                ->orWhere('type', 'request');
+        });
+
+        $ridesMatchAtStart= $activeRides->having('distance', '<=', $distance)
+            ->select(DB::raw("*,
+                     (3959 * ACOS(COS(RADIANS($data->lat_start))
+                           * COS(RADIANS(lat_start))
+                           * COS(RADIANS($data->lng_start) - RADIANS(lng_start))
+                           + SIN(RADIANS($data->lat_start))
+                           * SIN(RADIANS(lat_start)))) AS distance")
+            )->orderBy('distance', 'asc')->get();
+
+        $ridesMatchAtEnd= $activeRides->having('distance', '<=', $distance)
+            ->select(DB::raw("*,
+                     (3959 * ACOS(COS(RADIANS($data->lat_destination))
+                           * COS(RADIANS(lat_destination))
+                           * COS(RADIANS($data->lng_destination) - RADIANS(lng_destination))
+                           + SIN(RADIANS($data->lat_destination))
+                           * SIN(RADIANS(lat_destination)))) AS distance")
+            )->orderBy('distance', 'asc')
+            ->get();
+
+        foreach ($ridesMatchAtStart as $key => $rideMatchAtStart) {
+            foreach ($ridesMatchAtEnd as $key2 => $rideMatchAtEnd) {
+                if($rideMatchAtStart->id = $rideMatchAtEnd->id) {
+                    return ['data' => ['isMatch' => true, 'matchId' => $rideMatchAtEnd->id]];
+                }
+            }
+        }
+        return ['data' => ['isMatch' => false, 'matchId' => '']];
     }
 
 }

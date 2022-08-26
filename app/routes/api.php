@@ -20,10 +20,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/users', [UserController::class, "getUsers"]);
+Route::middleware('auth:sanctum')->get('/users', [UserController::class, "getUsers"]);
 
-Route::get('/rides/user/{id}', [RideController::class, "getRidesOfUser"])->where(['id' => '[0-9]+']);
+Route::middleware('auth:sanctum')->get('/rides/user/{id}', [RideController::class, "getRidesOfUser"])->where(['id' => '[0-9]+']);
 
-Route::get('/rides/{id}/comments', [RideController::class, "getComments"])->where(['id' => '[0-9]+']);
+Route::middleware('auth:sanctum')->get('/rides/{id}/comments', [RideController::class, "getComments"])->where(['id' => '[0-9]+']);
 
-Route::apiResource('rides', RideController::class);
+Route::middleware('auth:sanctum')->apiResource('rides', RideController::class);
