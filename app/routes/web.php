@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -22,8 +23,17 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth'])->name('dashboard');
+Route::middleware('auth')->group(function () {
+    Route::get('/', [DashboardController::class, 'showRides'])->name('dashboard');
+
+    //Route::get('/rides/create', [DashboardController::class, 'showCreateRouteForm'])->name('showCreateRide');
+    //Route::post('/rides/create', [DashboardController::class, 'createRoute'])->name('createRide');
+    Route::get('/rides/{id}/edit', [DashboardController::class, 'showEditRide'])
+        ->where(['id' => '[0-9]+'])->name('showEditRide');
+    Route::post('/rides/{id}/edit', [DashboardController::class, 'editRide'])
+        ->where(['id' => '[0-9]+'])->name('editRide');
+    Route::post('/rides/{id}/delete', [DashboardController::class, 'deleteRide'])
+        ->where(['id' => '[0-9]+'])->name('deleteRide');
+});
 
 require __DIR__.'/auth.php';
