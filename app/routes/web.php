@@ -24,16 +24,25 @@ Route::get('/', function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::get('/', [DashboardController::class, 'showRides'])->name('dashboard');
+    Route::get('/', [DashboardController::class, 'showDashboard'])->name('dashboard');
 
-    //Route::get('/rides/create', [DashboardController::class, 'showCreateRouteForm'])->name('showCreateRide');
-    //Route::post('/rides/create', [DashboardController::class, 'createRoute'])->name('createRide');
+    Route::get('/rides/create', [DashboardController::class, 'showCreateRide'])->name('showCreateRide');
+    Route::post('/rides/create', [DashboardController::class, 'createRide'])->name('createRide');
+
     Route::get('/rides/{id}/edit', [DashboardController::class, 'showEditRide'])
         ->where(['id' => '[0-9]+'])->name('showEditRide');
     Route::post('/rides/{id}/edit', [DashboardController::class, 'editRide'])
         ->where(['id' => '[0-9]+'])->name('editRide');
-    Route::post('/rides/{id}/delete', [DashboardController::class, 'deleteRide'])
+
+    Route::get('/users/{id}/edit', [DashboardController::class, 'showEditUser'])
+        ->where(['id' => '[0-9]+'])->name('showEditUser');
+    Route::post('/users/{id}/edit', [DashboardController::class, 'editUser'])
+        ->where(['id' => '[0-9]+'])->name('editUser');
+
+    Route::get('/rides/{id}/delete', [DashboardController::class, 'deleteRide'])
         ->where(['id' => '[0-9]+'])->name('deleteRide');
+    Route::get('/users/{id}/delete', [DashboardController::class, 'deleteUser'])
+        ->where(['id' => '[0-9]+'])->name('deleteUser');
 });
 
 require __DIR__.'/auth.php';

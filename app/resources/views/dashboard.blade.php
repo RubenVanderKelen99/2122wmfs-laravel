@@ -7,9 +7,12 @@
 
     <div class="py-12">
         <div class="flex flex-col">
+            <div class="flex flex-row justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight px-6">
                 Rides
             </h2>
+            <a href="{{ route('showCreateRide')}}" class="text-green-600 hover:text-green-900 px-6">Nieuwe aanmaken</a>
+            </div>
             <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
                 <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
                     <div class="shadow border-b border-gray-200 sm:rounded-lg">
@@ -148,7 +151,7 @@
                                             {{ $user->remember_token != null ? $user->remember_token : 'x'  }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                                            <a href="{{ route('editRide', $user->id) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                                            <a href="{{ route('editUser', $user->id) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -158,7 +161,7 @@
 
                     </div>
                     <div class="mt-4">
-                        {{ $rides->links() }}
+                        {{ $users->links() }}
                     </div>
                 </div>
             </div>

@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 
 class DashboardController extends Controller
@@ -22,7 +23,7 @@ class DashboardController extends Controller
         return true;
     }
 
-    public function showRides()
+    public function showDashboard()
     {
         if (!$this->isAdmin()) {
             return redirect('/');
@@ -50,6 +51,19 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function showEditUser($id)
+    {
+        if (!$this->isAdmin()) {
+            return redirect('/');
+        }
+
+        $user = User::query()->where('id', $id)->first();
+
+        return view('editUser', [
+            'user' => $user,
+        ]);
+    }
+
     public function editRide($id, Request $request)
     {
         if (!$this->isAdmin()) {
@@ -61,6 +75,68 @@ class DashboardController extends Controller
         $ride = Ride::query()->findOrFail($id);
 
         $ride->fill([
+            'lat_start' => $request->lat_start,
+            'lng_start' => $request->lng_start,
+            'lat_destination' => $request->lat_destination,
+            'lng_destination' => $request->lng_destination,
+            'start_time' => $request->start_time,
+            'end_time' => $request->end_time,
+            'type' => $request->type,
+            'user1_id' => $request->user1_id,
+            'user2_id' => $request->user2_id != null ? $request->user2_id : null,
+        ]);
+
+        $ride->save();
+
+        return redirect()->route('dashboard');
+    }
+
+    public function editUser($id, Request $request)
+    {
+        if (!$this->isAdmin()) {
+            return redirect('/');
+        }
+
+        $request->validate([
+            'name' => 'required|unique:App\Models\User,name|string|max:255',
+            'email' => 'required|unique:App\Models\User,email|string|email|max:255',
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'role' => 'required|in:admin,user',
+        ]);
+
+        $user = User::query()->findOrFail($id);
+
+        $user->fill([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => $request->role,
+        ]);
+
+        $user->save();
+
+        return redirect()->route('dashboard');
+    }
+
+
+    public function showCreateRide()
+    {
+        if (!$this->isAdmin()) {
+            return redirect('/');
+        }
+
+        return view('createRide');
+    }
+
+    public function createRide(Request $request)
+    {
+        if (!$this->isAdmin()) {
+            return redirect('/');
+        }
+
+        $this->validateRequest($request);
+
+        $ride = new Ride([
             'lat_start' => $request->lat_start,
             'lng_start' => $request->lng_start,
             'lat_destination' => $request->lat_destination,
@@ -95,5 +171,29 @@ class DashboardController extends Controller
             'type' => 'required|in:request,offer',
             'user1_id' => 'required|exists:App\Models\User,id',
         ]);
+    }
+
+    public function deleteRide($id)
+    {
+        if (!$this->isAdmin()) {
+            return redirect('/');
+        }
+
+        $ride = Ride::query()->findOrFail($id);
+        $ride->delete();
+
+        return redirect()->route('dashboard');
+    }
+
+    public function deleteUser($id)
+    {
+        if (!$this->isAdmin()) {
+            return redirect('/');
+        }
+
+        $ride = User::query()->findOrFail($id);
+        $ride->delete();
+
+        return redirect()->route('dashboard');
     }
 }
